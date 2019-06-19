@@ -9,14 +9,14 @@ import scipy.ndimage.filters as filt
 # Uses GDAL, numpy, scipy
 # Turns a DEM into an STL file with a base
 
-dem_path = './megt_n_512.tif'
-out_path = './megt_n_512.stl'
-dsamp = 10 #factor for downsampling the DEM
-vx = 50 #vertical exaggeration
-volume = True #if false output is a surface, if true sides and a base are added
-base = 4000 #this is elevation below the max height to put the base, in DEM units
-smooth = True # Whether to smooth with a gaussian kernel
-sigma = 3 # For smoothing filter
+dem_path = './ak_crop.tif'
+out_path = './ak_crop.stl'
+dsamp = 5         # factor for downsampling the DEM
+vx = 10           # vertical exaggeration
+volume = True     # if false output is a surface, if true sides and a base are added
+base = 2000       # this is elevation below the max height to put the base, in DEM units
+smooth = True     # Whether to smooth with a gaussian kernel
+sigma = 3         # For smoothing filter
 
 # Use this if the DEM has bad values stored for the pixel dimensions
 # The value should be in the same units as the DEM heights 
@@ -96,6 +96,9 @@ else:
 print("{} facets".format(ftot))
 leng = struct.pack('<I',ftot)
 outfl.write(leng)
+
+# Flip vertical to correct for top left indexing
+dem_data = np.flip(dem_data, 0)
 
 # Make the surface
 # Making triangles and calculating normal vectors
