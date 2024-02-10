@@ -1,10 +1,10 @@
 # dem2stl
-dem2stl is a python script to transform a square or rectangular DEM into a 3D print-able STL file.  
+dem2stl is a python script to transform a square or rectangular DEM into a 3D print-able STL file. It uses (rasterio)[https://rasterio.readthedocs.io/en/stable/] to open DEMs, so should be able to handle any file format that rasterio can deal with.
   
 dem2stl can be installed with pip:  
 `pip install git+https://github.com/mchristoffersen/dem2stl.git`  
   
-dem2stl can't handle DEMs with no-data cells. Also make sure that the elevation units are the same as the map projection units. Mixed unit DEMs (e.g. x/y in decimal degrees and z in meters) won't work well.   
+dem2stl can't handle DEMs with no-data cells. Also make sure that the elevation units are the same as the map projection units. Mixed unit DEMs (e.g. x/y in decimal degrees and z in meters) won't work well. The program reads in the first band of the raster it is fed, so if you have a multi-band file you'll either need to make sure that the elevation data you want to make a model from is the first band, modify dem2stl to read in the bad you need (either change the ds.read(1) line in main() or maybe add a command line option?), or generate a single band file from your multi band file and feed that to dem2stl.
   
 Argparse printout explaining usage -  
 ```
