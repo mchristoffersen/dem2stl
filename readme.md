@@ -1,6 +1,12 @@
 # dem2stl
-dem2stl is a python script to transform a square or rectangular DEM into a 3D print-able STL file. Argparse printout explaining usage -  
-
+dem2stl is a python script to transform a square or rectangular DEM into a 3D print-able STL file.  
+  
+dem2stl can be installed with pip:  
+pip install git+https://github.com/mchristoffersen/dem2stl.git  
+  
+dem2stl can't handle DEMs with no-data cells. Also make sure that the elevation units are the same as the map projection units. Mixed unit DEMs (e.g. x/y in decimal degrees and z in meters) won't work well.   
+  
+Argparse printout explaining usage -  
 ```
 usage: dem2stl.py [-h] [-o OUTPUT] [-s SCALE] [-vx VERTICAL_EXAGGERATION]  
                   [-p POINT_DENSITY]  

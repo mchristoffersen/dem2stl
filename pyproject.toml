@@ -1,0 +1,29 @@
+[build-system]
+requires = [
+    "setuptools>=61.0.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dem2stl"
+version = "0.1.0"
+description = "Generate a 3D printable mesh from a raster DEM"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {file = "LICENSE.txt"}
+authors = [
+    {name = "Michael Christoffersen"},
+    {email = "mchristo28@gmail.com"}
+]
+dependencies = [
+    "rasterio",
+    "numpy",
+    "scipy",
+]
+
+[project.urls]
+repository = "https://github.com/mchristoffersen/dem2stl"
+
+[project.scripts]
+dem2stl = "dem2stl:main"
