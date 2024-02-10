@@ -1,8 +1,10 @@
+import argparse
+import os
+import struct
+
 import numpy as np
-import argparse, os, struct
 import rasterio as rio
 import scipy.signal as spsig
-import matplotlib.pyplot as plt
 
 
 def genFacets(grid, dx, dy, bpct=0.2):
