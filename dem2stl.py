@@ -5,6 +5,7 @@ import struct
 import numpy as np
 import rasterio as rio
 import scipy.signal as spsig
+import matplotlib.pyplot as plt
 
 
 def genFacets(grid, dx, dy, bpct=0.2):
@@ -226,8 +227,31 @@ def cli():
         type=float,
         default=1,
     )
+    parser.add_argument(
+        "-b",
+        "--band",
+        help="Raster band to use",
+        type=int,
+        default=1,
+    )
 
     return parser.parse_args()
+
+
+def make_nice_number(x):
+    # return engineering-ish notation version of a number
+    # There is probably a smarter way to do this...
+    # not handling < 1 or very big numbers
+    if x >= 1 and x < 1e3:
+        return "%03d" % x
+    if x < 1e6:
+        return "%03dk" % (x / 1e3)
+    if x < 1e9:
+        return "%03dM" % (x / 1e6)
+    if x < 1e12:
+        return "%03dG" % (x / 1e9)
+
+    raise ValueError("unhandled number in make_nice_number")
 
 
 def main():
@@ -236,35 +260,32 @@ def main():
     print("Creating STL file from " + args.DEM)
     # Open DEM and load data/metadata
     ds = rio.open(args.DEM, "r")
-    grid = ds.read(1)
+    grid = ds.read(args.band)
     w = ds.width
     h = ds.height
-    dx = ds.transform[0]
-    dy = ds.transform[4]
+    dx = np.abs(ds.transform[0])
+    dy = np.abs(ds.transform[4])
     ds.close()
 
     # Calculate scaled dimensions and resolution
     txdim = np.abs(dx * w)  # True dims in m
     tydim = np.abs(dy * h)
-    sf = args.scale / 1000  # scale factor
+    sf = args.scale  # scale factor
     sxdim = txdim / sf  # Scaled dims in mm
     sydim = tydim / sf
     sdx = dx / sf  # Scale dx and dy
     sdy = dy / sf
 
     # Decimate points to about point-density points per mm
+    print("Filtering and sub-sampling raster")
     if sdx < 1:
         xf = np.abs(int(1 / args.point_density / sdx))
-        xfs = factorize(xf)
-        for f in xfs:
-            grid = spsig.decimate(grid, f, axis=1, zero_phase=True, ftype="iir")
+        grid = spsig.decimate(grid, xf, axis=1, zero_phase=True, ftype="fir")
         sdx = sdx * xf
         sxdim = np.abs(sdx * grid.shape[1])
     if sdy < 1:
         yf = np.abs(int(1 / args.point_density / sdy))
-        yfs = factorize(yf)
-        for f in yfs:
-            grid = spsig.decimate(grid, f, axis=0, zero_phase=True, ftype="iir")
+        grid = spsig.decimate(grid, yf, axis=0, zero_phase=True, ftype="fir")
         sdy = sdy * yf
         sydim = np.abs(sdy * grid.shape[0])
 
@@ -276,8 +297,8 @@ def main():
         fext = os.path.splitext(args.DEM)[1]
         args.output = args.DEM.replace(
             fext,
-            "_1to%dk_%.1fx_%.2fppmm.stl"
-            % (int(args.scale / 1000), args.vertical_exaggeration, 1 / sdx),
+            "_1to%s_%.1fx_%.2fppmm.stl"
+            % (make_nice_number(args.scale), args.vertical_exaggeration, 1 / sdx),
         )
     print("STL will be saved to " + args.output)
     print("STL dimensions: %.0fmm X %.0fmm" % (sxdim, sydim))
